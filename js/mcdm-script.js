@@ -64,6 +64,9 @@ function generateTopsisForm() {
     
     html += '<button class="btn-calculate" onclick="calculateTopsis()">Calcular TOPSIS</button>';
     
+    // CSV Upload Button
+    html += '<input type="file" id="topsis-csv-upload" accept=".csv" onchange="handleTopsisCSV(event)">';
+    
     container.innerHTML = html;
 }
 
@@ -203,6 +206,73 @@ class TOPSIS {
     }
 }
 
+// CSV Upload Handler for TOPSIS
+function handleTopsisCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        parseTopsisCSV(text);
+    };
+    reader.readAsText(file);
+}
+
+function parseTopsisCSV(csvText) {
+    const lines = csvText.trim().split('\n').map(line => line.split(',').map(cell => cell.trim()));
+    
+    if (lines.length < 3) {
+        alert('El archivo CSV debe tener al menos 3 filas (criterios, datos, configuración)');
+        return;
+    }
+    
+    // Primera fila: nombres de criterios
+    const criteriaNames = lines[0];
+    const numCriteria = criteriaNames.length;
+    
+    // Penúltima fila: valores de alternativas
+    const numAlternatives = lines.length - 2;
+    const matrix = lines.slice(1, -1).map(row => row.map(parseFloat));
+    
+    // Última fila: pesos y tipos (alternando)
+    const configLine = lines[lines.length - 1];
+    const weights = [];
+    const types = [];
+    
+    for (let i = 0; i < configLine.length; i += 2) {
+        weights.push(parseFloat(configLine[i]));
+        types.push(configLine[i + 1] || 'beneficio');
+    }
+    
+    // Actualizar campos
+    document.getElementById('topsis-alternatives').value = numAlternatives;
+    document.getElementById('topsis-criteria').value = numCriteria;
+    
+    // Generar formulario y llenar con datos
+    generateTopsisForm();
+    
+    setTimeout(() => {
+        // Llenar matriz
+        for (let i = 0; i < numAlternatives; i++) {
+            for (let j = 0; j < numCriteria; j++) {
+                const input = document.getElementById(`topsis-val-${i}-${j}`);
+                if (input) input.value = matrix[i][j];
+            }
+        }
+        
+        // Llenar pesos y tipos
+        for (let j = 0; j < numCriteria; j++) {
+            const weightInput = document.getElementById(`topsis-weight-${j}`);
+            const typeInput = document.getElementById(`topsis-type-${j}`);
+            if (weightInput) weightInput.value = weights[j];
+            if (typeInput) typeInput.value = types[j];
+        }
+        
+        alert('Datos cargados exitosamente desde el archivo CSV');
+    }, 100);
+}
+
 // ===== AHP =====
 function generateAhpForm() {
     const numCriteria = parseInt(document.getElementById('ahp-criteria').value);
@@ -244,6 +314,9 @@ function generateAhpForm() {
     
     html += '<button class="btn-calculate" onclick="calculateAHP()">Calcular AHP</button>';
     
+    // CSV Upload Button
+    html += '<input type="file" id="ahp-csv-upload" accept=".csv" onchange="handleAhpCSV(event)">';
+    
     container.innerHTML = html;
 }
 
@@ -277,6 +350,57 @@ function calculateAHP() {
     
     // Mostrar resultados
     displayAHPResults(result);
+}
+
+// CSV Upload Handler for AHP
+function handleAhpCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        parseAhpCSV(text);
+    };
+    reader.readAsText(file);
+}
+
+function parseAhpCSV(csvText) {
+    const lines = csvText.trim().split('\n').map(line => line.split(',').map(cell => cell.trim()));
+    
+    if (lines.length < 2) {
+        alert('El archivo CSV debe tener al menos 2 filas');
+        return;
+    }
+    
+    const numCriteria = lines.length;
+    const criteriaNames = lines.map(row => row[0]);
+    
+    // Actualizar campo
+    document.getElementById('ahp-criteria').value = numCriteria;
+    
+    // Generar formulario
+    generateAhpForm();
+    
+    setTimeout(() => {
+        // Llenar nombres
+        for (let i = 0; i < numCriteria; i++) {
+            const nameInput = document.getElementById(`ahp-name-${i}`);
+            if (nameInput) nameInput.value = criteriaNames[i];
+        }
+        
+        // Llenar matriz (solo parte superior)
+        for (let i = 0; i < numCriteria; i++) {
+            for (let j = i + 1; j < numCriteria; j++) {
+                const compInput = document.getElementById(`ahp-comp-${i}-${j}`);
+                if (compInput && lines[i][j + 1]) {
+                    compInput.value = parseFloat(lines[i][j + 1]);
+                }
+            }
+        }
+        
+        alert('Datos cargados exitosamente desde el archivo CSV');
+    }, 100);
 }
 
 class AHP {
@@ -418,6 +542,9 @@ function generateIntegratedForm() {
     
     html += '<button class="btn-calculate" onclick="calculateIntegrated()">Calcular Sistema Integrado</button>';
     
+    // CSV Upload Button
+    html += '<input type="file" id="integrated-csv-upload" accept=".csv" onchange="handleIntegratedCSV(event)">';
+    
     container.innerHTML = html;
 }
 
@@ -473,6 +600,99 @@ function calculateIntegrated() {
     
     // Mostrar resultados integrados
     displayIntegratedResults(ahpResult, topsisResult, criteriaNames, weights);
+}
+
+// CSV Upload Handler for Integrated System
+function handleIntegratedCSV(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        parseIntegratedCSV(text);
+    };
+    reader.readAsText(file);
+}
+
+function parseIntegratedCSV(csvText) {
+    const lines = csvText.trim().split('\n').map(line => line.split(',').map(cell => cell.trim()));
+    
+    // Buscar secciones por marcadores
+    let criteriaSection = [];
+    let ahpSection = [];
+    let alternativesSection = [];
+    let currentSection = null;
+    
+    for (let i = 0; i < lines.length; i++) {
+        const firstCell = lines[i][0].toLowerCase();
+        
+        if (firstCell.includes('criterio') || firstCell.includes('criteria')) {
+            currentSection = 'criteria';
+            continue;
+        } else if (firstCell.includes('ahp') || firstCell.includes('comparacion')) {
+            currentSection = 'ahp';
+            continue;
+        } else if (firstCell.includes('alternativa') || firstCell.includes('alternative')) {
+            currentSection = 'alternatives';
+            continue;
+        }
+        
+        if (currentSection === 'criteria') {
+            criteriaSection.push(lines[i]);
+        } else if (currentSection === 'ahp') {
+            ahpSection.push(lines[i]);
+        } else if (currentSection === 'alternatives') {
+            alternativesSection.push(lines[i]);
+        }
+    }
+    
+    if (criteriaSection.length === 0 || ahpSection.length === 0 || alternativesSection.length === 0) {
+        alert('El archivo CSV debe tener las tres secciones: Criterios, AHP y Alternativas');
+        return;
+    }
+    
+    const numCriteria = criteriaSection.length;
+    const numAlternatives = alternativesSection.length;
+    
+    // Actualizar campos
+    document.getElementById('int-alternatives').value = numAlternatives;
+    document.getElementById('int-criteria').value = numCriteria;
+    
+    // Generar formulario
+    generateIntegratedForm();
+    
+    setTimeout(() => {
+        // Llenar nombres y tipos de criterios
+        for (let i = 0; i < numCriteria; i++) {
+            const nameInput = document.getElementById(`int-crit-name-${i}`);
+            const typeInput = document.getElementById(`int-crit-type-${i}`);
+            if (nameInput) nameInput.value = criteriaSection[i][0];
+            if (typeInput && criteriaSection[i][1]) typeInput.value = criteriaSection[i][1];
+        }
+        
+        // Llenar matriz AHP
+        for (let i = 0; i < numCriteria; i++) {
+            for (let j = i + 1; j < numCriteria; j++) {
+                const ahpInput = document.getElementById(`int-ahp-${i}-${j}`);
+                if (ahpInput && ahpSection[i] && ahpSection[i][j + 1]) {
+                    ahpInput.value = parseFloat(ahpSection[i][j + 1]);
+                }
+            }
+        }
+        
+        // Llenar valores de alternativas
+        for (let i = 0; i < numAlternatives; i++) {
+            for (let j = 0; j < numCriteria; j++) {
+                const valInput = document.getElementById(`int-val-${i}-${j}`);
+                if (valInput && alternativesSection[i][j]) {
+                    valInput.value = parseFloat(alternativesSection[i][j]);
+                }
+            }
+        }
+        
+        alert('Datos cargados exitosamente desde el archivo CSV');
+    }, 100);
 }
 
 // ===== VISUALIZACIÓN DE RESULTADOS =====

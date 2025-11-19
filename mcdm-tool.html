@@ -45,6 +45,23 @@
             <section class="config-section" id="topsis-config" style="display: none;">
                 <h2>Configuración TOPSIS</h2>
                 
+                <!-- Added CSV upload section for TOPSIS -->
+                <div class="upload-section">
+                    <h3>Cargar datos desde CSV</h3>
+                    <div class="upload-info">
+                        <p>El archivo CSV debe tener el siguiente formato:</p>
+                        <ul>
+                            <li>Primera fila: nombres de criterios</li>
+                            <li>Siguientes filas: valores de cada alternativa</li>
+                            <li>Última fila: pesos y tipos (peso1,tipo1,peso2,tipo2,...)</li>
+                        </ul>
+                    </div>
+                    <input type="file" id="topsis-csv-upload" accept=".csv" onchange="handleTopsisCSV(event)">
+                    <button class="btn-secondary" onclick="document.getElementById('topsis-csv-upload').click()">Seleccionar archivo CSV</button>
+                </div>
+                
+                <div class="divider">O configurar manualmente</div>
+                
                 <div class="form-group">
                     <label>Número de Alternativas:</label>
                     <input type="number" id="topsis-alternatives" min="2" max="20" value="3">
@@ -64,6 +81,23 @@
             <section class="config-section" id="ahp-config" style="display: none;">
                 <h2>Configuración AHP</h2>
                 
+                <!-- Added CSV upload section for AHP -->
+                <div class="upload-section">
+                    <h3>Cargar matriz desde CSV</h3>
+                    <div class="upload-info">
+                        <p>El archivo CSV debe contener la matriz de comparaciones por pares:</p>
+                        <ul>
+                            <li>Primera columna: nombres de criterios</li>
+                            <li>Siguientes columnas: valores de comparación</li>
+                            <li>Solo ingrese la matriz triangular superior</li>
+                        </ul>
+                    </div>
+                    <input type="file" id="ahp-csv-upload" accept=".csv" onchange="handleAhpCSV(event)">
+                    <button class="btn-secondary" onclick="document.getElementById('ahp-csv-upload').click()">Seleccionar archivo CSV</button>
+                </div>
+                
+                <div class="divider">O configurar manualmente</div>
+                
                 <div class="form-group">
                     <label>Número de Criterios:</label>
                     <input type="number" id="ahp-criteria" min="2" max="10" value="4">
@@ -77,6 +111,23 @@
             <!-- Integrated Configuration -->
             <section class="config-section" id="integrated-config" style="display: none;">
                 <h2>Configuración Sistema Integrado</h2>
+                
+                <!-- Added CSV upload section for integrated system -->
+                <div class="upload-section">
+                    <h3>Cargar datos completos desde CSV</h3>
+                    <div class="upload-info">
+                        <p>El archivo CSV debe incluir:</p>
+                        <ul>
+                            <li>Sección 1: Nombres y tipos de criterios</li>
+                            <li>Sección 2: Matriz de comparaciones AHP</li>
+                            <li>Sección 3: Valores de alternativas</li>
+                        </ul>
+                    </div>
+                    <input type="file" id="integrated-csv-upload" accept=".csv" onchange="handleIntegratedCSV(event)">
+                    <button class="btn-secondary" onclick="document.getElementById('integrated-csv-upload').click()">Seleccionar archivo CSV</button>
+                </div>
+                
+                <div class="divider">O configurar manualmente</div>
                 
                 <div class="form-group">
                     <label>Número de Alternativas:</label>
