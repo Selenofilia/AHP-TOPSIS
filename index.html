@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Integrado MCDM - TOPSIS & AHP</title>
-    <link rel="stylesheet" href="css/mcdm-styles.css">
+    <link rel="stylesheet" href="/mcdm-styles.css">
 </head>
 <body>
     <div class="container">
@@ -45,18 +45,19 @@
             <section class="config-section" id="topsis-config" style="display: none;">
                 <h2>Configuración TOPSIS</h2>
                 
-                <!-- Added CSV upload section for TOPSIS -->
+                <!-- Updated CSV instructions to clarify square matrix support -->
                 <div class="upload-section">
                     <h3>Cargar datos desde CSV</h3>
                     <div class="upload-info">
-                        <p>El archivo CSV debe tener el siguiente formato:</p>
+                        <p>El archivo CSV puede tener uno de estos formatos:</p>
                         <ul>
-                            <li>Primera fila: nombres de criterios</li>
-                            <li>Siguientes filas: valores de cada alternativa</li>
-                            <li>Última fila: pesos y tipos (peso1,tipo1,peso2,tipo2,...)</li>
+                            <li><strong>Formato 1 (solo números):</strong> Matriz rectangular o cuadrada NxM (filas=alternativas, columnas=criterios)</li>
+                            <li><strong>Formato 2 (con encabezados):</strong> Primera fila con nombres de criterios, luego valores</li>
+                            <li>Acepta formato europeo (comas como decimales)</li>
+                            <li>Pesos iguales se asignarán automáticamente (puedes ajustarlos después)</li>
                         </ul>
                     </div>
-                    <input type="file" id="topsis-csv-upload" accept=".csv" onchange="handleTopsisCSV(event)">
+                    <input type="file" id="topsis-csv-upload" accept=".csv" onchange="handleTopsisCSV(event)" style="display: none;">
                     <button class="btn-secondary" onclick="document.getElementById('topsis-csv-upload').click()">Seleccionar archivo CSV</button>
                 </div>
                 
@@ -81,18 +82,20 @@
             <section class="config-section" id="ahp-config" style="display: none;">
                 <h2>Configuración AHP</h2>
                 
-                <!-- Added CSV upload section for AHP -->
+                <!-- Updated CSV instructions for square matrix support -->
                 <div class="upload-section">
                     <h3>Cargar matriz desde CSV</h3>
                     <div class="upload-info">
-                        <p>El archivo CSV debe contener la matriz de comparaciones por pares:</p>
+                        <p>El archivo CSV puede tener uno de estos formatos:</p>
                         <ul>
-                            <li>Primera columna: nombres de criterios</li>
-                            <li>Siguientes columnas: valores de comparación</li>
-                            <li>Solo ingrese la matriz triangular superior</li>
+                            <li><strong>Formato 1 (solo números):</strong> Matriz cuadrada numérica NxN sin encabezados</li>
+                            <li><strong>Formato 2 (con encabezados):</strong> Primera fila/columna con nombres, luego valores</li>
+                            <li>Acepta formato europeo (comas como decimales)</li>
+                            <li>La matriz debe ser cuadrada (mismo número de filas y columnas)</li>
                         </ul>
+                        <p style="color: #10b981; margin-top: 0.5rem;">✓ Tu archivo de 11x11 es compatible</p>
                     </div>
-                    <input type="file" id="ahp-csv-upload" accept=".csv" onchange="handleAhpCSV(event)">
+                    <input type="file" id="ahp-csv-upload" accept=".csv" onchange="handleAhpCSV(event)" style="display: none;">
                     <button class="btn-secondary" onclick="document.getElementById('ahp-csv-upload').click()">Seleccionar archivo CSV</button>
                 </div>
                 
@@ -156,6 +159,6 @@
         </footer>
     </div>
 
-    <script src="js/mcdm-script.js"></script>
+    <script src="/mcdm-script.js"></script>
 </body>
 </html>
